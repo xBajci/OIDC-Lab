@@ -1,0 +1,520 @@
+<div class="flex gap-6">
+  <!-- Main Form Area -->
+  <div class="flex-1">
+    {{#if loadedFromHistory}}
+    <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
+      Loaded configuration from history. Modify as needed and click "Start Flow".
+    </div>
+    {{/if}}
+
+    <!-- Form -->
+    <div class="bg-white shadow rounded-lg p-6">
+      <form id="flowForm" action="/flow/start" method="POST" class="space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="sm:col-span-2">
+            <label for="issuer" class="block text-sm font-medium text-gray-700">Server URL (Issuer) *</label>
+            <input type="url" id="issuer" name="issuer" value="{{defaults.issuer}}" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+              placeholder="{{defaults.issuer}}">
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="clientSelect" class="block text-sm font-medium text-gray-700">Client *</label>
+            <select id="clientSelect" onchange="onClientSelected(this.value)"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+              <option value="">Loading clients...</option>
+            </select>
+            <p id="clientSelectHint" class="mt-1 text-xs text-gray-400 hidden"></p>
+          </div>
+
+          <div id="manualClientFields" class="sm:col-span-2 hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label for="clientId" class="block text-sm font-medium text-gray-700">Client ID *</label>
+                <input type="text" id="clientId" name="clientId" value="{{defaults.clientId}}" required
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  placeholder="your-client-id">
+              </div>
+              <div>
+                <label for="clientSecret" class="block text-sm font-medium text-gray-700">Client Secret</label>
+                <input type="text" id="clientSecret" name="clientSecret" value="{{defaults.clientSecret}}"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  placeholder="(optional for public clients)">
+              </div>
+            </div>
+          </div>
+
+          <div id="responseTypeGroup">
+            <label for="responseType" class="block text-sm font-medium text-gray-700">Response Type</label>
+            <select id="responseType" name="responseType"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+              <option value="code" {{#if (eq defaults.responseType "code" )}}selected{{/if}}>code</option>
+              <option value="code id_token" {{#if (eq defaults.responseType "code id_token" )}}selected{{/if}}>code
+                id_token</option>
+              <option value="id_token" {{#if (eq defaults.responseType "id_token" )}}selected{{/if}}>id_token</option>
+              <option value="id_token token" {{#if (eq defaults.responseType "id_token token" )}}selected{{/if}}>
+                id_token token</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="scope" class="block text-sm font-medium text-gray-700">Scope</label>
+            <input type="text" id="scope" name="scope" value="{{defaults.scope}}"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+              placeholder="openid profile email">
+          </div>
+
+          <div id="redirectUriGroup" class="sm:col-span-2">
+            <label for="redirectUri" class="block text-sm font-medium text-gray-700">Redirect URI</label>
+            <input type="url" id="redirectUri" name="redirectUri" value="{{defaults.redirectUri}}"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+              placeholder="{{defaults.redirectUri}}">
+          </div>
+        </div>
+
+        <!-- Security Options -->
+        <div id="securityOptionsGroup" class="border-t pt-6">
+          <h3 class="text-sm font-medium text-gray-700 mb-4">Security Options</h3>
+          <div class="flex flex-wrap gap-6">
+            <div class="flex items-center">
+              <input type="checkbox" id="pkceEnabled" name="pkceEnabled" {{#if defaults.pkceEnabled}}checked{{/if}}
+                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+              <label for="pkceEnabled" class="ml-2 block text-sm text-gray-700">
+                PKCE (S256)
+                <span class="tooltip ml-1">
+                  <span class="text-gray-400 cursor-help">(?)</span>
+                  <span class="tooltip-text">Proof Key for Code Exchange. Prevents authorization code interception
+                    attacks. Required for public clients, recommended for all clients.</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="flex items-center">
+              <input type="checkbox" id="stateEnabled" name="stateEnabled" {{#if defaults.stateEnabled}}checked{{/if}}
+                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+              <label for="stateEnabled" class="ml-2 block text-sm text-gray-700">
+                State
+                <span class="tooltip ml-1">
+                  <span class="text-gray-400 cursor-help">(?)</span>
+                  <span class="tooltip-text">Random value to prevent CSRF attacks. The server echoes it back and the
+                    client verifies it matches.</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="flex items-center">
+              <input type="checkbox" id="nonceEnabled" name="nonceEnabled" {{#if defaults.nonceEnabled}}checked{{/if}}
+                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+              <label for="nonceEnabled" class="ml-2 block text-sm text-gray-700">
+                Nonce
+                <span class="tooltip ml-1">
+                  <span class="text-gray-400 cursor-help">(?)</span>
+                  <span class="tooltip-text">Random value included in the ID token to prevent replay attacks. Required
+                    for implicit flows.</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="flex items-center">
+              <input type="checkbox" id="refreshTokens" onchange="toggleRefreshTokens(this.checked)"
+                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+              <label for="refreshTokens" class="ml-2 block text-sm text-gray-700">
+                Refresh Tokens
+                <span class="tooltip ml-1">
+                  <span class="text-gray-400 cursor-help">(?)</span>
+                  <span class="tooltip-text">Adds offline_access to scope and prompt=consent to the request. The OIDC
+                    spec requires prompt=consent for offline_access, otherwise the server silently strips it.</span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Extra Params -->
+        <div id="extraParamsGroup">
+          <label for="extraParams" class="block text-sm font-medium text-gray-700">
+            Extra Parameters (JSON)
+            <span class="tooltip ml-1">
+              <span class="text-gray-400 cursor-help">(?)</span>
+              <span class="tooltip-text">Additional parameters to include in the authorization request. E.g., {"prompt":
+                "consent", "login_hint": "user@example.com"}</span>
+            </span>
+          </label>
+          <textarea id="extraParams" name="extraParams" rows="2"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 font-mono text-sm"
+            placeholder='{"prompt":"consent"}'>{{defaults.extraParams}}</textarea>
+        </div>
+
+        <button id="submitBtn" type="submit"
+          class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+          Start Flow &rarr;
+        </button>
+
+        <div id="deviceFlowHint" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded text-sm">
+          <strong>Device Flow requires</strong> a client registered with the
+          <code class="bg-yellow-100 px-1 rounded">urn:ietf:params:oauth:grant-type:device_code</code> grant type.
+          Use the <a href="/admin/clients/new" target="_blank" class="underline font-medium">admin dashboard</a>
+          "Device Flow Client" preset to create one.
+        </div>
+
+        <!-- Curl Preview -->
+        <div class="border-t pt-4">
+          <h3 class="text-sm font-medium text-gray-700 mb-3">Inspect as curl</h3>
+          <div id="curlPreview">
+            <div class="relative">
+              <pre id="curlCommand" class="bg-gray-900 text-green-400 text-xs p-4 rounded-md overflow-x-auto font-mono whitespace-pre-wrap"></pre>
+              <button type="button" onclick="copyCurl()" title="Copy to clipboard"
+                class="absolute top-2 right-2 p-1.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white transition-colors">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+              </button>
+            </div>
+            <p class="mt-2 text-xs text-gray-400">
+              This is the authorization request your browser will make. PKCE code_verifier and state/nonce are generated at runtime and will differ from these placeholders.
+            </p>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="w-72 flex-shrink-0 space-y-4">
+    <!-- Quick Presets -->
+    <div class="bg-white shadow rounded-lg p-4">
+      <h2 class="text-sm font-medium text-gray-700 mb-3">Quick Presets</h2>
+      <div class="space-y-2">
+        {{#each presets}}
+        <button type="button" onclick="applyPreset('{{@key}}')"
+          class="w-full bg-white border-2 border-gray-200 rounded-lg p-3 text-left hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+          <div class="flex items-start">
+            <div class="flex-1">
+              <h3 class="text-sm font-medium text-gray-900">{{name}}</h3>
+              <p class="mt-0.5 text-xs text-gray-500">
+                {{config.responseType}} | {{config.scope}}
+              </p>
+            </div>
+            <div class="tooltip ml-2">
+              <span class="text-gray-400 hover:text-gray-600 cursor-help">(?)</span>
+              <span class="tooltip-text">{{tooltip}}</span>
+            </div>
+          </div>
+        </button>
+        {{/each}}
+      </div>
+    </div>
+
+    <!-- Recent Flows -->
+    <div class="bg-white shadow rounded-lg p-4">
+      <h2 class="text-sm font-medium text-gray-700 mb-3">Recent Flows</h2>
+      {{#if recentFlows.length}}
+      <ul class="space-y-2">
+        {{#each recentFlows}}
+        <li>
+          <a href="/flow/history/{{id}}" class="block p-2 rounded hover:bg-gray-50 transition-colors">
+            <div class="text-sm font-medium text-gray-900 truncate">{{clientId}}</div>
+            <div class="text-xs text-gray-500">
+              {{responseType}} | {{truncate scope 15}}
+            </div>
+            <div class="text-xs text-gray-400">{{formatDate createdAt}}</div>
+          </a>
+        </li>
+        {{/each}}
+      </ul>
+      {{else}}
+      <p class="text-sm text-gray-500">No flows yet. Start one to see it here.</p>
+      {{/if}}
+    </div>
+  </div>
+</div>
+
+<script>
+  // === Client Dropdown ===
+  let knownClients = []; // Fetched from server
+
+  async function fetchClients() {
+    const issuer = document.getElementById('issuer').value.replace(/\/+$/, '');
+    const select = document.getElementById('clientSelect');
+    const hint = document.getElementById('clientSelectHint');
+
+    select.innerHTML = '<option value="">Loading...</option>';
+    hint.classList.add('hidden');
+
+    try {
+      const res = await fetch('/admin/api/clients');
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      knownClients = await res.json();
+
+      select.innerHTML = '';
+      if (knownClients.length === 0) {
+        select.innerHTML = '<option value="__manual__">No clients found — enter manually</option>';
+      } else {
+        for (const c of knownClients) {
+          const opt = document.createElement('option');
+          opt.value = c.client_id;
+          const authType = c.token_endpoint_auth_method === 'none' ? 'public' : 'confidential';
+          opt.textContent = (c.client_name || c.client_id) + ' (' + authType + ')';
+          select.appendChild(opt);
+        }
+        const manualOpt = document.createElement('option');
+        manualOpt.value = '__manual__';
+        manualOpt.textContent = '— Enter manually —';
+        select.appendChild(manualOpt);
+
+        // Auto-select: prefer defaults.clientId if it matches, otherwise first
+        const defaultId = document.getElementById('clientId').value;
+        if (defaultId && knownClients.some(c => c.client_id === defaultId)) {
+          select.value = defaultId;
+        }
+      }
+      onClientSelected(select.value);
+    } catch (err) {
+      console.error('Failed to fetch clients:', err);
+      select.innerHTML = '<option value="__manual__">Could not load clients — enter manually</option>';
+      onClientSelected('__manual__');
+    }
+  }
+
+  function onClientSelected(value) {
+    const manualFields = document.getElementById('manualClientFields');
+    const hint = document.getElementById('clientSelectHint');
+
+    if (value === '__manual__') {
+      manualFields.classList.remove('hidden');
+      hint.classList.add('hidden');
+      updateCurlPreview();
+      return;
+    }
+
+    const client = knownClients.find(c => c.client_id === value);
+    if (client) {
+      document.getElementById('clientId').value = client.client_id;
+      document.getElementById('clientSecret').value = client.client_secret || '';
+      manualFields.classList.add('hidden');
+      // Show grant types as a hint
+      const grants = client.grant_types.map(g => g.replace('urn:ietf:params:oauth:grant-type:', '')).join(', ');
+      hint.textContent = 'ID: ' + client.client_id + ' | Grants: ' + grants;
+      hint.classList.remove('hidden');
+    }
+    updateCurlPreview();
+  }
+
+  // Re-fetch clients when issuer changes (debounced)
+  let issuerTimer = null;
+  document.getElementById('issuer').addEventListener('input', function () {
+    clearTimeout(issuerTimer);
+    issuerTimer = setTimeout(fetchClients, 500);
+  });
+
+  // === Presets ===
+  const presets = {
+    serverSide: {
+      responseType: 'code',
+      scope: 'openid profile email offline_access',
+      pkceEnabled: true,
+      stateEnabled: true,
+      nonceEnabled: true,
+      extraParams: '{"prompt":"consent"}'
+    },
+    implicitSpa: {
+      responseType: 'id_token token',
+      scope: 'openid profile email',
+      pkceEnabled: false,
+      stateEnabled: true,
+      nonceEnabled: true,
+      extraParams: ''
+    },
+    modernSpa: {
+      responseType: 'code',
+      scope: 'openid profile email',
+      pkceEnabled: true,
+      stateEnabled: true,
+      nonceEnabled: true,
+      extraParams: ''
+    },
+    mostSecure: {
+      responseType: 'code',
+      scope: 'openid',
+      pkceEnabled: true,
+      stateEnabled: true,
+      nonceEnabled: true,
+      extraParams: '{"prompt":"consent"}'
+    },
+    deviceFlow: {
+      responseType: 'code',
+      scope: 'openid profile email',
+      pkceEnabled: false,
+      stateEnabled: false,
+      nonceEnabled: false,
+      extraParams: ''
+    }
+  };
+
+  function applyPreset(key) {
+    const preset = presets[key];
+    if (preset) {
+      document.getElementById('responseType').value = preset.responseType;
+      document.getElementById('scope').value = preset.scope;
+      document.getElementById('pkceEnabled').checked = preset.pkceEnabled;
+      document.getElementById('stateEnabled').checked = preset.stateEnabled;
+      document.getElementById('nonceEnabled').checked = preset.nonceEnabled;
+      // Sync refresh checkbox BEFORE setting extraParams so it can't overwrite preset values
+      syncRefreshCheckbox();
+      document.getElementById('extraParams').value = preset.extraParams;
+
+      // Switch form action and toggle device flow mode
+      const form = document.getElementById('flowForm');
+      const submitBtn = document.getElementById('submitBtn');
+      if (key === 'deviceFlow') {
+        form.action = '/flow/device/start';
+        submitBtn.textContent = 'Start Device Flow \u2192';
+        setDeviceFlowMode(true);
+      } else {
+        form.action = '/flow/start';
+        submitBtn.textContent = 'Start Flow \u2192';
+        setDeviceFlowMode(false);
+      }
+      updateCurlPreview();
+    }
+  }
+
+  /**
+   * Enable/disable form fields that don't apply to device flow.
+   * When disabled, fields are grayed out so users can see what's different.
+   */
+  function setDeviceFlowMode(enabled) {
+    const disableGroups = ['responseTypeGroup', 'redirectUriGroup', 'securityOptionsGroup', 'extraParamsGroup'];
+    for (const id of disableGroups) {
+      const group = document.getElementById(id);
+      if (!group) continue;
+      // Disable all inputs, selects, textareas, and checkboxes within the group
+      const controls = group.querySelectorAll('input, select, textarea');
+      for (const el of controls) {
+        el.disabled = enabled;
+      }
+      // Visual feedback: reduce opacity when disabled
+      group.style.opacity = enabled ? '0.4' : '1';
+      group.style.pointerEvents = enabled ? 'none' : '';
+    }
+    // Show/hide the device flow hint
+    const hint = document.getElementById('deviceFlowHint');
+    if (hint) {
+      hint.classList.toggle('hidden', !enabled);
+    }
+  }
+
+  function toggleRefreshTokens(enabled) {
+    const scopeEl = document.getElementById('scope');
+    const extraEl = document.getElementById('extraParams');
+    let scopes = scopeEl.value.split(/\s+/).filter(Boolean);
+    let extra = {};
+    try { extra = extraEl.value.trim() ? JSON.parse(extraEl.value) : {}; } catch { }
+
+    if (enabled) {
+      if (!scopes.includes('offline_access')) scopes.push('offline_access');
+      // OIDC spec requires prompt=consent for offline_access
+      extra.prompt = 'consent';
+    } else {
+      scopes = scopes.filter(s => s !== 'offline_access');
+      // Only remove prompt=consent if it was "consent" (don't wipe other prompt values
+      // that may have been set independently by a preset or the user)
+      if (extra.prompt === 'consent') delete extra.prompt;
+    }
+
+    scopeEl.value = scopes.join(' ');
+    extraEl.value = Object.keys(extra).length ? JSON.stringify(extra) : '';
+    updateCurlPreview();
+  }
+
+  function syncRefreshCheckbox() {
+    const scope = document.getElementById('scope').value;
+    document.getElementById('refreshTokens').checked = scope.includes('offline_access');
+  }
+
+  // === Curl Preview ===
+  function updateCurlPreview() {
+
+    const form = document.getElementById('flowForm');
+    const isDevice = form.action.endsWith('/flow/device/start');
+    const issuer = document.getElementById('issuer').value.replace(/\/+$/, '');
+    const clientId = document.getElementById('clientId').value || '<CLIENT_ID>';
+    const clientSecret = document.getElementById('clientSecret').value;
+    const scope = document.getElementById('scope').value || 'openid';
+
+    let curl;
+
+    if (isDevice) {
+      // Device flow: POST to the device_authorization_endpoint
+      const parts = ['curl -X POST ' + shellQuote(issuer + '/device/auth')];
+      if (clientSecret) {
+        parts.push('  -u ' + shellQuote(clientId + ':' + clientSecret));
+      } else {
+        parts.push('  -d ' + shellQuote('client_id=' + clientId));
+      }
+      parts.push('  -d ' + shellQuote('scope=' + scope));
+      curl = parts.join(' \\\n');
+    } else {
+      // Authorization code / implicit: GET to the authorization endpoint
+      const responseType = document.getElementById('responseType').value;
+      const redirectUri = document.getElementById('redirectUri').value || '{{defaults.redirectUri}}';
+      const pkce = document.getElementById('pkceEnabled').checked;
+      const state = document.getElementById('stateEnabled').checked;
+      const nonce = document.getElementById('nonceEnabled').checked;
+      const extraRaw = document.getElementById('extraParams').value;
+      let extra = {};
+      try { extra = extraRaw.trim() ? JSON.parse(extraRaw) : {}; } catch { }
+
+      const params = new URLSearchParams();
+      params.set('client_id', clientId);
+      params.set('redirect_uri', redirectUri);
+      params.set('response_type', responseType);
+      params.set('scope', scope);
+      if (pkce) {
+        params.set('code_challenge', '<SHA256_OF_RANDOM_VERIFIER>');
+        params.set('code_challenge_method', 'S256');
+      }
+      if (state) params.set('state', '<RANDOM_STATE>');
+      if (nonce) params.set('nonce', '<RANDOM_NONCE>');
+      for (const [k, v] of Object.entries(extra)) {
+        params.set(k, String(v));
+      }
+
+      // Show as a readable GET URL the browser will navigate to
+      curl = '# Browser navigates to:\ncurl -G ' + shellQuote(issuer + '/auth');
+      for (const [k, v] of params.entries()) {
+        curl += ' \\\n  --data-urlencode ' + shellQuote(k + '=' + v);
+      }
+    }
+
+    document.getElementById('curlCommand').textContent = curl;
+  }
+
+  function shellQuote(s) {
+    // Single-quote for shell, escaping any existing single quotes
+    return "'" + s.replace(/'/g, "'\\''") + "'";
+  }
+
+  function copyCurl() {
+    const text = document.getElementById('curlCommand').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      // Brief visual feedback
+      const btn = event.currentTarget;
+      btn.classList.add('text-green-400');
+      setTimeout(() => btn.classList.remove('text-green-400'), 1000);
+    });
+  }
+
+  // Update curl preview when any form field changes
+  document.querySelectorAll('#flowForm input, #flowForm select, #flowForm textarea').forEach(el => {
+    el.addEventListener('input', updateCurlPreview);
+    el.addEventListener('change', updateCurlPreview);
+  });
+
+  // === Init ===
+  document.addEventListener('DOMContentLoaded', function () {
+    syncRefreshCheckbox();
+    fetchClients();
+    updateCurlPreview();
+  });
+</script>

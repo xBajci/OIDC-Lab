@@ -1,0 +1,206 @@
+<div class="max-w-2xl mx-auto">
+  <div class="sm:flex sm:items-center sm:justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">{{title}}</h1>
+    <a href="/flow" class="text-sm text-gray-500 hover:text-gray-700">&larr; Start new flow</a>
+  </div>
+
+  <!-- Device Display Simulation -->
+  <div id="devicePanel" class="bg-gray-900 text-white rounded-lg p-8 mb-6 text-center">
+    <!-- Waiting State -->
+    <div id="waitingState">
+      <p class="text-sm text-gray-400 mb-4 uppercase tracking-wide">Your Device Code</p>
+      <p class="text-5xl font-mono font-bold tracking-widest mb-6">{{userCode}}</p>
+
+      <!-- QR Code -->
+      <div class="flex justify-center mb-6">
+        <canvas id="qrCanvas" class="rounded-lg"></canvas>
+      </div>
+
+      <p class="text-sm text-gray-400 mb-2">Scan the QR code or open this URL:</p>
+      <a
+        href="{{#if verificationUriComplete}}{{verificationUriComplete}}{{else}}{{verificationUri}}{{/if}}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-lg text-blue-400 hover:text-blue-300 underline break-all"
+      >{{verificationUri}}</a>
+
+      <div class="mt-6 pt-6 border-t border-gray-700 flex items-center justify-center space-x-4">
+        <p class="text-sm text-gray-400">
+          Expires in: <span id="countdown" class="font-mono text-yellow-400">{{expiresIn}}</span>s
+        </p>
+        <span id="pollingIndicator" class="inline-flex items-center text-sm text-gray-500">
+          <span class="relative flex h-2 w-2 mr-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
+          Polling...
+        </span>
+      </div>
+    </div>
+
+    <!-- Authorized State (hidden initially) -->
+    <div id="authorizedState" class="hidden">
+      <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-500/20 mb-4">
+        <svg class="h-10 w-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold text-green-400 mb-2">Device Authorized!</h2>
+      <p class="text-gray-400 mb-6">The authorization server approved your device.</p>
+      <form action="/flow/device/exchange" method="POST">
+        <button
+          type="submit"
+          class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-gray-900"
+        >
+          View Tokens &rarr;
+        </button>
+      </form>
+    </div>
+
+    <!-- Expired State (hidden initially) -->
+    <div id="expiredState" class="hidden">
+      <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-500/20 mb-4">
+        <svg class="h-10 w-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold text-red-400 mb-2">Code Expired</h2>
+      <p id="expiredMessage" class="text-gray-400 mb-6">The device code has expired. Please start a new flow.</p>
+      <a
+        href="/flow"
+        class="inline-flex items-center px-6 py-3 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-gray-900"
+      >
+        &larr; Start New Flow
+      </a>
+    </div>
+  </div>
+
+  <!-- Educational Info -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-medium text-gray-900 mb-3">How Device Flow Works</h2>
+    <div class="text-sm text-gray-600 space-y-2">
+      <p><strong>1.</strong> The device (this page) requested a device code from the authorization server.</p>
+      <p><strong>2.</strong> Scan the QR code or open the verification URL in any browser.</p>
+      <p><strong>3.</strong> Enter the code shown above, sign in, and authorize the device.</p>
+      <p><strong>4.</strong> This page automatically detects when you authorize — no need to come back and click anything.</p>
+      <p class="text-gray-500 mt-3">
+        <strong>Under the hood:</strong> This page polls
+        <code class="bg-gray-100 px-1 rounded">GET /device/status</code> every
+        <code class="bg-gray-100 px-1 rounded" id="intervalDisplay">{{interval}}</code> seconds.
+        That endpoint makes a single token request using
+        <code class="bg-gray-100 px-1 rounded">genericGrantRequest()</code> and returns the status
+        without blocking.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1/build/qrcode.min.js"></script>
+<script>
+  // === Configuration ===
+  const expiresIn = {{expiresIn}};
+  let interval = {{interval}};
+  let remaining = expiresIn;
+
+  // === DOM Elements ===
+  const waitingState = document.getElementById('waitingState');
+  const authorizedState = document.getElementById('authorizedState');
+  const expiredState = document.getElementById('expiredState');
+  const countdownEl = document.getElementById('countdown');
+  const pollingIndicator = document.getElementById('pollingIndicator');
+  const intervalDisplay = document.getElementById('intervalDisplay');
+
+  // === QR Code Generation ===
+  const verificationUriComplete = {{#if verificationUriComplete}}{{{json verificationUriComplete}}}{{else}}null{{/if}};
+  const verificationUri = {{{json verificationUri}}};
+  const verificationUrl = verificationUriComplete || verificationUri;
+  if (verificationUrl) {
+    QRCode.toCanvas(document.getElementById('qrCanvas'), verificationUrl, {
+      width: 200,
+      margin: 2,
+      color: { dark: '#000000', light: '#ffffff' },
+    }, function(err) {
+      if (err) console.error('QR generation failed:', err);
+    });
+  }
+
+  // === Countdown Timer ===
+  const countdownTimer = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(countdownTimer);
+      showExpired('The device code has expired. Please start a new flow.');
+    } else {
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+      countdownEl.textContent = mins > 0
+        ? `${mins}:${secs.toString().padStart(2, '0')}`
+        : `${secs}`;
+    }
+  }, 1000);
+
+  // === Status Polling ===
+  let pollTimer = null;
+
+  function startPolling() {
+    pollTimer = setInterval(checkStatus, interval * 1000);
+  }
+
+  async function checkStatus() {
+    try {
+      const res = await fetch('/flow/device/status');
+      const data = await res.json();
+
+      switch (data.status) {
+        case 'authorized':
+          stopAll();
+          showAuthorized();
+          break;
+        case 'pending':
+          // Keep polling
+          break;
+        case 'slow_down':
+          // Increase interval by 5 seconds per RFC 8628
+          clearInterval(pollTimer);
+          interval += 5;
+          intervalDisplay.textContent = interval;
+          startPolling();
+          break;
+        case 'expired':
+          stopAll();
+          showExpired(data.message || 'The device code has expired. Please start a new flow.');
+          break;
+        case 'error':
+          stopAll();
+          showExpired(data.message || 'An unexpected error occurred.');
+          break;
+      }
+    } catch (err) {
+      console.error('Status poll failed:', err);
+      // Don't stop polling on network errors — retry next interval
+    }
+  }
+
+  function stopAll() {
+    clearInterval(countdownTimer);
+    clearInterval(pollTimer);
+  }
+
+  function showAuthorized() {
+    waitingState.classList.add('hidden');
+    expiredState.classList.add('hidden');
+    authorizedState.classList.remove('hidden');
+  }
+
+  function showExpired(message) {
+    waitingState.classList.add('hidden');
+    authorizedState.classList.add('hidden');
+    expiredState.classList.remove('hidden');
+    if (message) {
+      document.getElementById('expiredMessage').textContent = message;
+    }
+  }
+
+  // Start polling after initial interval delay
+  setTimeout(startPolling, interval * 1000);
+</script>

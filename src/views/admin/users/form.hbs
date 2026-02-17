@@ -1,0 +1,100 @@
+<div class="max-w-2xl mx-auto">
+  <div class="sm:flex sm:items-center sm:justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">{{#if isNew}}New User{{else}}Edit User{{/if}}</h1>
+    <a href="/admin/users" class="text-sm text-gray-500 hover:text-gray-700">&larr; Back to users</a>
+  </div>
+
+  {{#if error}}
+  <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+    {{error}}
+  </div>
+  {{/if}}
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <form action="{{#if isNew}}/admin/users{{else}}/admin/users/{{user.id}}{{/if}}" method="POST" class="space-y-6">
+      <div>
+        <label for="username" class="block text-sm font-medium text-gray-700">Username *</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          value="{{user.username}}"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="johndoe"
+        >
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">
+          Password {{#if isNew}}*{{else}}(leave blank to keep current){{/if}}
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          {{#if isNew}}required{{/if}}
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="{{#if isNew}}Enter password{{else}}Enter new password{{/if}}"
+        >
+      </div>
+
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value="{{user.name}}"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="John Doe"
+        >
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value="{{user.email}}"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="john@example.com"
+        >
+      </div>
+
+      <div class="flex items-center">
+        <input
+          type="checkbox"
+          id="emailVerified"
+          name="emailVerified"
+          {{#if user.emailVerified}}checked{{/if}}
+          class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+        >
+        <label for="emailVerified" class="ml-2 block text-sm text-gray-700">Email verified</label>
+      </div>
+
+      <div>
+        <label for="roles" class="block text-sm font-medium text-gray-700">Roles</label>
+        <input
+          type="text"
+          id="roles"
+          name="roles"
+          value="{{user.roles}}"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="user, admin"
+        >
+        <p class="mt-1 text-sm text-gray-500">Comma-separated list of roles</p>
+      </div>
+
+      <div class="flex justify-end space-x-3">
+        <a href="/admin/users" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+          Cancel
+        </a>
+        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+          {{#if isNew}}Create User{{else}}Update User{{/if}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

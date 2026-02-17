@@ -1,0 +1,9 @@
+node_modules
+data
+.git
+.worktrees
+*.sqlite*
+.jwks.json
+.env
+docs
+.opencode

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{#if title}}{{title}} - {{/if}}OIDC Lab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 to-purple-100 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <div class="bg-white rounded-lg shadow-xl p-8">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Device Activation</h1>
+        <p class="text-gray-600 mt-2">
+          Enter the code shown on your device
+        </p>
+      </div>
+
+      {{#if error}}
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+        {{error}}
+      </div>
+      {{/if}}
+
+      {{!-- oidc-provider's form (hidden) — contains action URL, XSRF token, and user_code input --}}
+      <div style="display:none">{{{formHtml}}}</div>
+
+      {{!-- Styled UI that bridges to the provider's form --}}
+      <div class="space-y-4">
+        <div>
+          <label for="styled_user_code" class="block text-sm font-medium text-gray-700">
+            Device Code
+          </label>
+          <input
+            type="text"
+            id="styled_user_code"
+            required
+            autofocus
+            autocomplete="off"
+            class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-center text-2xl font-mono tracking-widest uppercase"
+            placeholder="XXXX-XXXX"
+          >
+        </div>
+
+        <button
+          type="button"
+          id="submitBtn"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Continue
+        </button>
+      </div>
+
+      <div class="mt-6 text-center text-sm text-gray-500">
+        <p>This code was displayed on a device that cannot use a browser directly.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var providerForm = document.getElementById('op.deviceInputForm');
+      var providerInput = providerForm ? providerForm.querySelector('input[name="user_code"]') : null;
+      var styledInput = document.getElementById('styled_user_code');
+      var submitBtn = document.getElementById('submitBtn');
+
+      function submitCode() {
+        var code = styledInput.value.trim();
+        if (!code) {
+          styledInput.focus();
+          return;
+        }
+        if (providerInput) {
+          providerInput.value = code;
+        }
+        if (providerForm) {
+          providerForm.submit();
+        }
+      }
+
+      submitBtn.addEventListener('click', submitCode);
+      styledInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitCode();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

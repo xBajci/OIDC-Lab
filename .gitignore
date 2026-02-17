@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.jwks.json
+*.log
+.DS_Store
+bun.lockb
+.worktrees/
+data/

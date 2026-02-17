@@ -1,0 +1,201 @@
+<div class="max-w-2xl mx-auto">
+  <div class="sm:flex sm:items-center sm:justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">{{client.client_name}}</h1>
+    <a href="/admin/clients" class="text-sm text-gray-500 hover:text-gray-700">&larr; Back to clients</a>
+  </div>
+
+  {{!-- Credentials Section --}}
+  <div class="bg-white shadow rounded-lg p-6 space-y-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900">Credentials</h2>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Client ID</label>
+      <div class="mt-1 flex rounded-md shadow-sm">
+        <input
+          type="text"
+          id="client_id"
+          readonly
+          value="{{client.client_id}}"
+          class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm font-mono"
+        >
+        <button
+          type="button"
+          onclick="copyToClipboard('client_id')"
+          class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+          title="Copy to clipboard"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {{#if credentials.client_secret}}
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Client Secret</label>
+      <div class="mt-1 flex rounded-md shadow-sm">
+        <input
+          type="text"
+          id="client_secret"
+          readonly
+          value="{{credentials.client_secret}}"
+          class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm font-mono"
+        >
+        <button
+          type="button"
+          onclick="copyToClipboard('client_secret')"
+          class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+          title="Copy to clipboard"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    {{else}}
+      {{#unless credentials}}
+      <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+        <p class="text-sm text-yellow-800">
+          Client secret is not available. This client was created before credential storage was enabled, or is a public client.
+        </p>
+      </div>
+      {{else}}
+      <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+        <p class="text-sm text-yellow-800">
+          <strong>Public Client:</strong> No client secret. This client uses PKCE for security.
+        </p>
+      </div>
+      {{/unless}}
+    {{/if}}
+
+    {{#if credentials.registration_access_token}}
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Registration Access Token</label>
+      <div class="mt-1 flex rounded-md shadow-sm">
+        <input
+          type="text"
+          id="registration_access_token"
+          readonly
+          value="{{credentials.registration_access_token}}"
+          class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm font-mono text-xs"
+        >
+        <button
+          type="button"
+          onclick="copyToClipboard('registration_access_token')"
+          class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+          title="Copy to clipboard"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">Used for client management via the registration endpoint</p>
+    </div>
+    {{/if}}
+  </div>
+
+  {{!-- Configuration Section --}}
+  <div class="bg-white shadow rounded-lg p-6 space-y-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900">Configuration</h2>
+
+    {{#if (includes client.grant_types "refresh_token")}}
+    <div class="bg-green-50 border border-green-200 rounded-md p-3 flex items-center">
+      <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      <p class="text-sm text-green-800"><strong>Refresh Tokens Enabled</strong> -- This client can request <code class="bg-green-100 px-1 rounded">offline_access</code> scope to obtain refresh tokens.</p>
+    </div>
+    {{else}}
+    <div class="bg-gray-50 border border-gray-200 rounded-md p-3 flex items-center">
+      <svg class="h-5 w-5 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+      </svg>
+      <p class="text-sm text-gray-600"><strong>Refresh Tokens Disabled</strong> -- This client cannot obtain refresh tokens. Re-register with <code class="bg-gray-100 px-1 rounded">refresh_token</code> grant type to enable.</p>
+    </div>
+    {{/if}}
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Application Type</label>
+      <p class="mt-1 text-sm">{{client.application_type}}</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Grant Types</label>
+      <div class="mt-1 flex flex-wrap gap-1">
+        {{#each client.grant_types}}
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          {{this}}
+        </span>
+        {{/each}}
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Response Types</label>
+      <div class="mt-1 flex flex-wrap gap-1">
+        {{#each client.response_types}}
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          {{this}}
+        </span>
+        {{/each}}
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Token Endpoint Auth Method</label>
+      <p class="mt-1 text-sm">{{client.token_endpoint_auth_method}}</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Scope</label>
+      <p class="mt-1 text-sm">{{client.scope}}</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Redirect URIs</label>
+      <ul class="mt-1 text-sm font-mono bg-gray-50 p-2 rounded space-y-1">
+        {{#each client.redirect_uris}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+
+    {{#if client.post_logout_redirect_uris}}
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Post Logout Redirect URIs</label>
+      <ul class="mt-1 text-sm font-mono bg-gray-50 p-2 rounded space-y-1">
+        {{#each client.post_logout_redirect_uris}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/if}}
+  </div>
+
+  <div class="flex justify-between items-center">
+    <form action="/admin/clients/{{client.client_id}}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this client?')">
+      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+        Delete Client
+      </button>
+    </form>
+    <a href="/flow" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+      Go to Flow Starter &rarr;
+    </a>
+  </div>
+</div>
+
+<script>
+function copyToClipboard(id) {
+  const input = document.getElementById(id);
+  input.select();
+  navigator.clipboard.writeText(input.value).then(function() {
+    const btn = input.nextElementSibling;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+    setTimeout(function() { btn.innerHTML = originalHTML; }, 1500);
+  });
+}
+</script>

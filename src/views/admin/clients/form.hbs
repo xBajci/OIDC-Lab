@@ -1,0 +1,254 @@
+<div class="max-w-4xl mx-auto">
+  <div class="sm:flex sm:items-center sm:justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Register New Client</h1>
+    <a href="/admin/clients" class="text-sm text-gray-500 hover:text-gray-700">&larr; Back to clients</a>
+  </div>
+
+  {{#if error}}
+  <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+    {{error}}
+  </div>
+  {{/if}}
+
+  <!-- Presets -->
+  <div class="mb-6">
+    <h2 class="text-lg font-medium text-gray-900 mb-3">Quick Presets</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {{#each presets}}
+      <button
+        type="button"
+        onclick="applyPreset('{{@key}}')"
+        class="relative bg-white border-2 border-gray-200 rounded-lg p-4 text-left hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+      >
+        <div class="flex items-start">
+          <div class="flex-1">
+            <h3 class="text-sm font-medium text-gray-900">{{name}}</h3>
+            <p class="mt-1 text-xs text-gray-500">
+              {{config.grant_types}} | {{config.token_endpoint_auth_method}}
+            </p>
+          </div>
+          <div class="tooltip ml-2">
+            <span class="text-gray-400 hover:text-gray-600 cursor-help">(?)</span>
+            <span class="tooltip-text">{{tooltip}}</span>
+          </div>
+        </div>
+      </button>
+      {{/each}}
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <form action="/admin/clients" method="POST" class="space-y-6">
+      <div>
+        <label for="client_name" class="block text-sm font-medium text-gray-700">Client Name *</label>
+        <input
+          type="text"
+          id="client_name"
+          name="client_name"
+          value="{{defaults.client_name}}"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="My Application"
+        >
+      </div>
+
+      <div>
+        <label for="redirect_uris" class="block text-sm font-medium text-gray-700">Redirect URIs *</label>
+        <textarea
+          id="redirect_uris"
+          name="redirect_uris"
+          rows="2"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="{{serverUrl}}/flow/callback"
+        >{{defaults.redirect_uris}}</textarea>
+        <p class="mt-1 text-sm text-gray-500">One URI per line</p>
+      </div>
+
+      <div>
+        <label for="post_logout_redirect_uris" class="block text-sm font-medium text-gray-700">Post Logout Redirect URIs</label>
+        <textarea
+          id="post_logout_redirect_uris"
+          name="post_logout_redirect_uris"
+          rows="2"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="{{serverUrl}}/"
+        >{{defaults.post_logout_redirect_uris}}</textarea>
+        <p class="mt-1 text-sm text-gray-500">One URI per line (optional)</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label for="grant_types" class="block text-sm font-medium text-gray-700">Grant Types</label>
+          <input
+            type="text"
+            id="grant_types"
+            name="grant_types"
+            value="{{defaults.grant_types}}"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="authorization_code, refresh_token"
+          >
+          <p class="mt-1 text-sm text-gray-500">Comma-separated</p>
+        </div>
+
+        <div>
+          <label for="response_types" class="block text-sm font-medium text-gray-700">Response Types</label>
+          <input
+            type="text"
+            id="response_types"
+            name="response_types"
+            value="{{defaults.response_types}}"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="code"
+          >
+          <p class="mt-1 text-sm text-gray-500">Comma-separated</p>
+        </div>
+      </div>
+
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
+          <input
+            type="checkbox"
+            id="allow_refresh_tokens"
+            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+          >
+        </div>
+        <div class="ml-3">
+          <label for="allow_refresh_tokens" class="text-sm font-medium text-gray-700">Allow Refresh Tokens</label>
+          <p class="text-sm text-gray-500">Adds <code class="bg-gray-100 px-1 rounded">refresh_token</code> to grant types and <code class="bg-gray-100 px-1 rounded">offline_access</code> to scope. The client can request long-lived sessions by including <code class="bg-gray-100 px-1 rounded">offline_access</code> in the authorization request scope.</p>
+        </div>
+      </div>
+
+      <div>
+        <label for="scope" class="block text-sm font-medium text-gray-700">Scope</label>
+        <input
+          type="text"
+          id="scope"
+          name="scope"
+          value="{{defaults.scope}}"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="openid profile email"
+        >
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label for="token_endpoint_auth_method" class="block text-sm font-medium text-gray-700">Token Endpoint Auth Method</label>
+          <select
+            id="token_endpoint_auth_method"
+            name="token_endpoint_auth_method"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="client_secret_basic" {{#if (eq defaults.token_endpoint_auth_method "client_secret_basic")}}selected{{/if}}>client_secret_basic</option>
+            <option value="client_secret_post" {{#if (eq defaults.token_endpoint_auth_method "client_secret_post")}}selected{{/if}}>client_secret_post</option>
+            <option value="none" {{#if (eq defaults.token_endpoint_auth_method "none")}}selected{{/if}}>none (Public Client)</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="application_type" class="block text-sm font-medium text-gray-700">Application Type</label>
+          <select
+            id="application_type"
+            name="application_type"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="web" {{#if (eq defaults.application_type "web")}}selected{{/if}}>web</option>
+            <option value="native" {{#if (eq defaults.application_type "native")}}selected{{/if}}>native</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-3">
+        <a href="/admin/clients" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+          Cancel
+        </a>
+        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+          Register Client
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const presets = {
+  confidential: {
+    grant_types: 'authorization_code, refresh_token',
+    response_types: 'code',
+    token_endpoint_auth_method: 'client_secret_basic',
+    scope: 'openid profile email',
+    application_type: 'web'
+  },
+  public: {
+    grant_types: 'authorization_code',
+    response_types: 'code',
+    token_endpoint_auth_method: 'none',
+    scope: 'openid profile email',
+    application_type: 'web'
+  },
+  implicit: {
+    grant_types: 'implicit',
+    response_types: 'id_token, id_token token',
+    token_endpoint_auth_method: 'none',
+    scope: 'openid profile email',
+    application_type: 'web'
+  },
+  secure: {
+    grant_types: 'authorization_code',
+    response_types: 'code',
+    token_endpoint_auth_method: 'client_secret_basic',
+    scope: 'openid',
+    application_type: 'web'
+  },
+  device: {
+    grant_types: 'urn:ietf:params:oauth:grant-type:device_code',
+    response_types: 'code',
+    token_endpoint_auth_method: 'client_secret_basic',
+    scope: 'openid profile email',
+    application_type: 'native'
+  }
+};
+
+function applyPreset(key) {
+  const preset = presets[key];
+  if (preset) {
+    document.getElementById('grant_types').value = preset.grant_types;
+    document.getElementById('response_types').value = preset.response_types;
+    document.getElementById('token_endpoint_auth_method').value = preset.token_endpoint_auth_method;
+    document.getElementById('scope').value = preset.scope;
+    document.getElementById('application_type').value = preset.application_type;
+    syncRefreshCheckbox();
+  }
+}
+
+// Sync the "Allow Refresh Tokens" checkbox with the grant_types field
+function syncRefreshCheckbox() {
+  const grantTypes = document.getElementById('grant_types').value;
+  document.getElementById('allow_refresh_tokens').checked = grantTypes.includes('refresh_token');
+}
+
+document.getElementById('allow_refresh_tokens').addEventListener('change', function() {
+  const grantTypesInput = document.getElementById('grant_types');
+  const scopeInput = document.getElementById('scope');
+  let grants = grantTypesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+  let scopes = scopeInput.value.split(' ').filter(Boolean);
+
+  if (this.checked) {
+    if (!grants.includes('refresh_token')) grants.push('refresh_token');
+    if (!scopes.includes('offline_access')) scopes.push('offline_access');
+  } else {
+    grants = grants.filter(g => g !== 'refresh_token');
+    scopes = scopes.filter(s => s !== 'offline_access');
+  }
+
+  grantTypesInput.value = grants.join(', ');
+  scopeInput.value = scopes.join(' ');
+});
+
+// Keep checkbox in sync when grant_types is edited manually
+document.getElementById('grant_types').addEventListener('input', syncRefreshCheckbox);
+
+// Set initial state on page load
+syncRefreshCheckbox();
+</script>

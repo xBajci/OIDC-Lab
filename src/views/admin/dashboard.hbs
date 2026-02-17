@@ -1,0 +1,128 @@
+<div class="space-y-6">
+  <div class="sm:flex sm:items-center sm:justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+  </div>
+
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- Users Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
+              </path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
+              <dd class="text-lg font-medium text-gray-900">{{userCount}}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-5 py-3">
+        <a href="/admin/users" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+          Manage users &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Clients Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+              </path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">OIDC Clients</dt>
+              <dd class="text-sm text-gray-600">Register and manage OAuth clients</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-5 py-3">
+        <a href="/admin/clients" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+          Manage clients &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Discovery Card -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+              </path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">OIDC Endpoints</dt>
+              <dd class="text-sm text-gray-600">View provider configuration</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-5 py-3">
+        <a href="/.well-known/openid-configuration" target="_blank"
+          class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+          Discovery document &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Info -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Server Information</h2>
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Issuer</dt>
+        <dd class="mt-1 text-sm text-gray-900">
+          <code class="bg-gray-100 px-2 py-1 rounded">{{issuer}}</code>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Authorization Endpoint</dt>
+        <dd class="mt-1 text-sm text-gray-900">
+          <code class="bg-gray-100 px-2 py-1 rounded">{{issuer}}auth</code>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Token Endpoint</dt>
+        <dd class="mt-1 text-sm text-gray-900">
+          <code class="bg-gray-100 px-2 py-1 rounded">{{issuer}}token</code>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">UserInfo Endpoint</dt>
+        <dd class="mt-1 text-sm text-gray-900">
+          <code class="bg-gray-100 px-2 py-1 rounded">{{issuer}}me</code>
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <!-- Getting Started -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+    <h2 class="text-lg font-medium text-blue-900 mb-2">Getting Started</h2>
+    <ol class="list-decimal list-inside text-sm text-blue-800 space-y-1">
+      <li>Create a user in <a href="/admin/users/new" class="underline">Users</a></li>
+      <li>Register a client in <a href="/admin/clients/new" class="underline">Clients</a></li>
+      <li>Copy the client_id and client_secret to the <a href="/flow" class="underline">Flow Starter</a></li>
+      <li>Start an OIDC flow and test the login/consent screens</li>
+    </ol>
+  </div>
+</div>
