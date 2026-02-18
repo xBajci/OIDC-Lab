@@ -1,5 +1,8 @@
 FROM oven/bun:1.3-slim
 
+ARG GIT_COMMIT=unknown
+ENV GIT_COMMIT=$GIT_COMMIT
+
 WORKDIR /app
 
 # Install dependencies (layer caching)

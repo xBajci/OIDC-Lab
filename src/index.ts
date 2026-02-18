@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { execSync } from 'node:child_process';
 import express from 'express';
 import session from 'express-session';
 import { engine } from 'express-handlebars';
@@ -17,6 +18,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const PORT = process.env.PORT || 3000;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
+
+function getGitVersion(): string {
+  if (process.env.GIT_COMMIT) return process.env.GIT_COMMIT.slice(0, 7);
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+  } catch {}
+  return 'dev';
+}
 
 async function main() {
   const db = getDb();
@@ -71,6 +82,7 @@ async function main() {
 
   // Single URL for everything
   app.locals.serverUrl = ISSUER;
+  app.locals.gitVersion = getGitVersion();
 
   // Create OIDC provider
   console.log('Creating OIDC provider...');
