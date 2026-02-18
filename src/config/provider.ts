@@ -6,8 +6,7 @@ import { SqliteAdapter } from '../adapter.js';
 import { getDb } from '../db.js';
 import * as userRepo from '../repos/users.js';
 import { getProviderJWKS } from './keys.js';
-
-const ISSUER = process.env.ISSUER || 'http://localhost:3000';
+import { ISSUER } from './env.js';
 
 /**
  * Find account by ID for oidc-provider

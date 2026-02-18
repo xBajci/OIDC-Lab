@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import { getDb } from '../db.js';
 import * as flowConfigRepo from '../repos/flow-configs.js';
 import * as credRepo from '../repos/client-credentials.js';
+import { ISSUER } from '../config/env.js';
 
 // Extend session type
 declare module 'express-session' {
@@ -100,8 +101,6 @@ const FLOW_PRESETS = {
   },
 };
 
-const DEFAULT_ISSUER = process.env.ISSUER || 'http://localhost:3000';
-
 export function createFlowRouter(): Router {
   const router = Router();
 
@@ -113,15 +112,13 @@ export function createFlowRouter(): Router {
       // Get recent flow configurations
       const recentFlows = flowConfigRepo.listRecentFlowConfigs(getDb(), 10);
 
-      const serverUrl = process.env.ISSUER || 'http://localhost:3000';
-
       res.render('flow/index', {
         title: 'Flow Starter',
         activeNav: 'flow',
         presets: FLOW_PRESETS,
         defaults: {
-          issuer: DEFAULT_ISSUER,
-          redirectUri: `${serverUrl}/flow/callback`,
+          issuer: ISSUER,
+          redirectUri: `${ISSUER}/flow/callback`,
           responseType: 'code',
           scope: 'openid profile email',
           pkceEnabled: true,
@@ -974,12 +971,10 @@ export function createFlowRouter(): Router {
         });
       }
 
-      const serverUrl = process.env.ISSUER || 'http://localhost:3000';
-
       // Build the end session URL
       const endSessionUrl = client.buildEndSessionUrl(config, {
         id_token_hint: idToken,
-        post_logout_redirect_uri: `${serverUrl}/flow`,
+        post_logout_redirect_uri: `${ISSUER}/flow`,
       });
 
       // Clear the session

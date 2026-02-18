@@ -11,6 +11,7 @@ import { createProvider } from './config/provider.js';
 import { createInteractionRouter } from './routes/interaction.js';
 import { createAdminRouter } from './routes/admin.js';
 import { createFlowRouter } from './routes/flow.js';
+import { ISSUER } from './config/env.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -69,7 +70,7 @@ async function main() {
   app.set('views', path.join(__dirname, 'views'));
 
   // Single URL for everything
-  app.locals.serverUrl = process.env.ISSUER || `http://localhost:${PORT}`;
+  app.locals.serverUrl = ISSUER;
 
   // Create OIDC provider
   console.log('Creating OIDC provider...');

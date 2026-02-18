@@ -4,9 +4,9 @@ import { migrate } from './migrate.js';
 import * as userRepo from './repos/users.js';
 import * as oidcRepo from './repos/oidc-documents.js';
 import * as credRepo from './repos/client-credentials.js';
+import { ISSUER } from './config/env.js';
 
 const db = getDb();
-const ISSUER = process.env.ISSUER || `http://localhost:${process.env.PORT || 3000}`;
 
 // Support --clean flag
 if (process.argv.includes('--clean')) {

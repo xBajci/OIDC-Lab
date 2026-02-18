@@ -4,6 +4,7 @@ import { getDb } from '../db.js';
 import * as userRepo from '../repos/users.js';
 import * as oidcRepo from '../repos/oidc-documents.js';
 import * as credRepo from '../repos/client-credentials.js';
+import { ISSUER } from '../config/env.js';
 
 // Helper to list all oidc_documents by model (not exposed by repo)
 interface OidcDocumentRow {
@@ -111,7 +112,7 @@ export function createAdminRouter(provider: Provider): Router {
         title: 'Admin Dashboard',
         activeNav: 'dashboard',
         userCount,
-        issuer: process.env.ISSUER || 'http://localhost:3000',
+        issuer: ISSUER,
       });
     } catch (err) {
       next(err);
@@ -270,13 +271,12 @@ export function createAdminRouter(provider: Provider): Router {
   });
 
   router.get('/clients/new', (req, res) => {
-    const serverUrl = process.env.ISSUER || 'http://localhost:3000';
     res.render('admin/clients/form', {
       title: 'Register Client',
       activeNav: 'clients',
       presets: CLIENT_PRESETS,
       defaults: {
-        redirect_uris: `${serverUrl}/flow/callback`,
+        redirect_uris: `${ISSUER}/flow/callback`,
         grant_types: 'authorization_code',
         response_types: 'code',
         scope: 'openid profile email',
@@ -326,8 +326,7 @@ export function createAdminRouter(provider: Provider): Router {
       };
 
       // Call the /reg endpoint internally
-      const issuer = process.env.ISSUER || 'http://localhost:3000';
-      const response = await fetch(`${issuer}/reg`, {
+      const response = await fetch(`${ISSUER}/reg`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
