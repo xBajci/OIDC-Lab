@@ -550,11 +550,12 @@ export function createFlowRouter(): Router {
         { execute: [client.allowInsecureRequests] }
       );
 
-      // Build the callback URL
-      const currentUrl = new URL(
-        req.originalUrl,
-        `http://${req.headers.host}`
-      );
+      // Build the callback URL using ISSUER as base to preserve the correct
+      // scheme in deployed environments where a reverse proxy terminates TLS.
+      // Using req.headers.host with hardcoded 'http://' would produce an http://
+      // URL even when the public-facing URL is https://, causing a redirect_uri
+      // mismatch in the token exchange (invalid_grant).
+      const currentUrl = new URL(req.originalUrl, ISSUER);
 
       // Exchange the code for tokens
       console.log('[CALLBACK] Calling authorizationCodeGrant...');
